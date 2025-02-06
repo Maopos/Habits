@@ -22,7 +22,7 @@ struct WelcomeImageModel: Identifiable {
 
 let welcomeImages: [WelcomeImageModel] = [
     .init(
-        title: "Keep and eye on workout",
+        title: "Keep and eye on your workout",
         image: "figure.strengthtraining.traditional.circle.fill",
         scale: 1
     ),
