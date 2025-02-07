@@ -18,6 +18,8 @@ struct WelcomeImageModel: Identifiable {
     var offset: CGFloat = 0
     var rotation: CGFloat = 0
     var zindex: CGFloat = 0
+    
+    var extraOffset = -350
 }
 
 let welcomeImages: [WelcomeImageModel] = [
@@ -48,7 +50,8 @@ let welcomeImages: [WelcomeImageModel] = [
         scale: 0.4,
         anchor: .bottomLeading,
         offset: -50,
-        rotation: 160
+        rotation: 160,
+        extraOffset: -120
     ),
     .init(
         title: "Take care of your health and increase your productivity",
@@ -56,6 +59,7 @@ let welcomeImages: [WelcomeImageModel] = [
         scale: 0.35,
         anchor: .bottomLeading,
         offset: -50,
-        rotation: 250
+        rotation: 250,
+        extraOffset: -100
     )
 ]
