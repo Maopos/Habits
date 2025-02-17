@@ -9,6 +9,10 @@ import SwiftUI
 
 struct WelcomeView: View {
     
+    @Environment(\.welcomeCoordinator) var welcomeCoordinator: WelcomeCoordinator
+    
+    @AppStorage("isWelcomeComplete") private var isWelcomeComplete: Bool = false
+    
     @State private var selectedItem: WelcomeImageModel = welcomeImages.first!
     @State private var allItems: [WelcomeImageModel] = welcomeImages
     @State private var activeIndex: Int = 0
@@ -17,7 +21,7 @@ struct WelcomeView: View {
         VStack(spacing: 0) {
             
             Button {
-                
+                updateItem(isFordward: false)
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.title3.bold())
@@ -42,7 +46,8 @@ struct WelcomeView: View {
                     .font(.title.bold())
                     .contentTransition(.numericText())
                 
-                Text("Our app description here!")
+                Text(selectedItem.description)
+                    .contentTransition(.numericText())
                     .font(.caption)
                     .foregroundStyle(.gray)
                 
@@ -52,6 +57,7 @@ struct WelcomeView: View {
                     Text(selectedItem.id == allItems.last?.id ? "Continue" : "Next")
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
+                        .contentTransition(.numericText())
                         .frame(width: 250)
                         .padding(.vertical, 12)
                         .background(.green.gradient, in: .buttonBorder)
@@ -101,29 +107,53 @@ struct WelcomeView: View {
     }
     
     func updateItem(isFordward: Bool) {
-        guard activeIndex != allItems.count - 1 else { return }
+        guard isFordward ? activeIndex != allItems.count - 1 : activeIndex != 0 else {
+            
+            isWelcomeComplete = true
+            welcomeCoordinator.push(page: .loginPage)
+            
+            return
+        }
         
-        activeIndex += 1
+        var fromIndex: Int
+        var extraOffset: CGFloat
         
-        let fromIndex = activeIndex - 1
+        if isFordward {
+            activeIndex += 1
+        } else {
+            activeIndex -= 1
+        }
+        
+        if isFordward {
+            fromIndex = activeIndex - 1
+            extraOffset = allItems[activeIndex].extraOffset
+        } else {
+            fromIndex = activeIndex + 1
+            extraOffset = allItems[activeIndex].extraOffset
+        }
+        
+        
         
         for index in allItems.indices {
             allItems[index].zindex = 0
         }
         
-        Task {
+        Task { [fromIndex, extraOffset] in
             withAnimation(.bouncy(duration: 1)) {
                 allItems[fromIndex].scale = allItems[activeIndex].scale
                 allItems[fromIndex].rotation = allItems[activeIndex].rotation
                 allItems[fromIndex].anchor = allItems[activeIndex].anchor
                 allItems[fromIndex].offset = allItems[activeIndex].offset
                 
+                
+                allItems[activeIndex].offset = extraOffset
+                
                 allItems[fromIndex].zindex = 1
             }
             
             try? await Task.sleep(for: .seconds(0.1))
             
-            withAnimation(.bouncy(duration: 0.9)) {
+            withAnimation(.bouncy(duration: 2)) {
                 allItems[activeIndex].scale = 1
                 allItems[activeIndex].rotation = .zero
                 allItems[activeIndex].anchor = .center
